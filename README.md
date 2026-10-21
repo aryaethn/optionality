@@ -2,8 +2,8 @@
 
 Lean 4 + Mathlib formalization, and numerical scripts, accompanying the paper
 
-> **Where Does the Option Go? Reveal Optionality, Forced Opening, and Its Price in Encrypted Mempools**
-> Aria Naraghi, October 2026.
+> Reveal Optionality in Encrypted Mempools
+> Separation, Pricing, and Blind Simultaneous Release with Post-Quantum Time-Locks
 
 The paper measures the free option that arises when someone can decide, after an encrypted mempool has fixed the
 ordering, whether a committed transaction is opened. This repository machine-checks the core statements of its five
