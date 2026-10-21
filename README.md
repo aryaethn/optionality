@@ -3,6 +3,7 @@
 Lean 4 + Mathlib formalization, and numerical scripts, accompanying the paper
 
 > Reveal Optionality in Encrypted Mempools
+>
 > Separation, Pricing, and Blind Simultaneous Release with Post-Quantum Time-Locks
 
 The paper measures the free option that arises when someone can decide, after an encrypted mempool has fixed the
