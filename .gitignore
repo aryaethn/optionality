@@ -1,0 +1,4 @@
+/.lake
+.DS_Store
+lakefile.local.toml
+lake-manifest.local.json
