@@ -6,7 +6,7 @@ Lean 4 + Mathlib formalization, and numerical scripts, accompanying the paper
 >
 > Separation, Pricing, and Blind Simultaneous Release with Post-Quantum Time-Locks
 
-The paper measures the free option that arises when someone can decide, after an encrypted mempool has fixed the
+The paper ([Reveal-Optionality-BSR.pdf](Reveal-Optionality-BSR.pdf)) measures the free option that arises when someone can decide, after an encrypted mempool has fixed the
 ordering, whether a committed transaction is opened. This repository machine-checks the core statements of its five
 theorems and their corollaries, and contains the scripts behind its numerical tables and figure.
 
