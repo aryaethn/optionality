@@ -14,7 +14,7 @@ theorems and their corollaries, and contains the scripts behind its numerical ta
 
 | | |
 |---|---|
-| Audited theorems | **107** (`Optionality/Audit.lean`, output in [`AXIOMS.txt`](AXIOMS.txt)) |
+| Audited theorems | **116** (`Optionality/Audit.lean`, output in [`AXIOMS.txt`](AXIOMS.txt)) |
 | `sorry` / `admit` / new `axiom` | none |
 | Axioms used | only `propext`, `Classical.choice`, `Quot.sound` |
 | Lean | `v4.34.1` (see `lean-toolchain`) |
@@ -61,6 +61,7 @@ migration, Theorem 5 Blind simultaneous release (the working drafts called Theor
 | `Block14` | blind-release window `γ ≤ Ω/ω` as an instance of Theorem 2(a); margins; pad length | §8 |
 | `Block15` | escrow model; zero option before the deadline, penalized option after; threshold arithmetic | Theorem 5 |
 | `Block16` | fee bound for a fixed reveal set; counting behind the deposit condition | Theorem 5(b),(c) |
+| `Block17` | ceilings as a function of the host window `W`, monotonicity, ticket-first and six-second values, pad lengths; sender-side time-lock ceiling in a ticket-first design | §8, App. A, §5 |
 | `Stretch` | non-strict Lemmas 1 and 2 over general probability spaces (`MeasureTheory.condExp`) | Lemmas 1, 2 |
 | `Audit` | `#print axioms` for every theorem above | |
 
@@ -107,6 +108,7 @@ not machine-checked.
 | `solver.py` | the attack-plan optimizer behind the fee-inversion numerics (general and selector classes); its `__main__` validates the greedy optimum against exhaustive search on 300 random instances and checks that `m = 1` reproduces LUCID's `f1` |
 | `calibrate.py` | the exogenous-option calibration table (Bachelier pricing of the sender's option; `F = 128`) and the dollar example, with a Monte Carlo cross-check |
 | `figure.py` | the calibration figure (fee that caps the exercise probability, against the fee-inversion lower bound) |
+| `bsr_params.py` | the blind-release window table: host window `W`, opening window `Θ`, ceiling `γ_max = (W − ω)/ω` and pad length for the ticket-first instantiation (twelve- and six-second slots), and the sender-side time-lock ceiling; writes `bsr_params.json` to the current directory |
 
 Run them from inside `python/` (`figure.py` imports `calibrate.py`; `figure.py` needs `matplotlib`). Two output paths are
 hard-coded from the original sandbox and must be edited first: the `json.dump(...)` target in `calibrate.py`

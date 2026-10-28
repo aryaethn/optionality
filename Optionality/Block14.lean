@@ -71,7 +71,10 @@ theorem bsr_window_of_thmB {νh νa ω Ω : ℝ} (t1 : ℝ) (hνh : 0 < νh) (h�
     exact ⟨x * νh, mul_pos hx hνh, (bsr_timely_iff t1).1 ht,
       (bsr_private_iff t1 hνh hνa).1 hp⟩
 
-/-- Opening window equals slot length minus escrow window: `γ_max = (T - ω) / ω`. -/
+/-- Opening window equals host window minus escrow window: `γ_max = (W - ω) / ω`, where the first
+argument `W = t2 - t1` is the host design's window between fixing the set of ciphertexts (`t1`) and
+the time by which release values must be public (`t2`). (Docstring only: the argument was
+previously described as the slot length; the definition and all statements are unchanged.) -/
 def gmaxBSR (T ω : ℝ) : ℝ := (T - ω) / ω
 
 /-- Block 14, item 61 (monotonicity). -/

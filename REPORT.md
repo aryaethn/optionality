@@ -567,3 +567,104 @@ Full `lake build`: 9 min 10 s wall-clock (cold cache). `Block16` 66 s; `Audit` 2
    the counting `j + k ≤ w`, `n < t + j + k` behind the deposit condition and its tightness; strict comparison of `⌈2n/3⌉` with the best threshold (iff `n = 2` or `n ≥ 4`)"; and shorten the
    "not formalized" list to: hiding, binding, pad determinism and sequentiality, solver parity, escrow-set consensus, the execution rule, that the executed set is fixed at `d`
    with the same pattern in every class, and the informal bound on `g`.
+
+---
+
+# Phase 6 (BSR on a host-design window): Block 17
+
+## Result
+All 6 requested items (85-90) are proven. Full `lake build` succeeds (8945 jobs); no `sorry`, `admit` or `axiom` in the sources (grep-checked).
+`AXIOMS.txt` now holds `#print axioms` for **116 audited theorems** (Phases 1-5b: 107; Phase 6: 6 requested statements + 3 extras). The only
+axioms appearing anywhere are `propext`, `Classical.choice`, `Quot.sound` (11 purely arithmetic proofs use a subset). No requested statement was false
+or ill-typed, and no existing statement was changed.
+
+## Imports
+`Block17` imports `Optionality.Block14` only (narrow: it brings in `Block9`, which holds the Theorem 2 lemmas used here: `thmB_iff` (item 23) and `thmB_b_opt`
+(item 25), and `padLength`/`gmaxBSR` from Block 14). No full `import Mathlib`.
+
+## Theorems (all PROVEN)
+| # | Name | Note |
+|---|------|------|
+| 85 | `gmaxBSR_strictMono_window` | `StrictMono (fun W => gmaxBSR W ω)` for `0 < ω` |
+| 86 | `gmaxBSR_values_ticketFirst` | `gmaxBSR 8 2 = 3`, `9 2 = 7/2`, `8 1 = 7`, `9 1 = 8` |
+| 87 | `gmaxBSR_values_six` | `gmaxBSR 4 2 = 1`, `(9/2) 2 = 5/4`, `4 1 = 3`, `(9/2) 1 = 7/2` |
+| 88 | `gmaxBSR_range_ticketFirst` | `8 ≤ W ≤ 9` gives `[3, 7/2]` for `ω = 2` and `[7, 8]` for `ω = 1` |
+| 89 | `pad_length_examples` | `Θ = 6`: `(8.5, 8.6) × 10^7`; `Θ = 7`: exactly `10^8`; `Θ = 11`: `(1.5, 1.6) × 10^8` |
+| 90 | `ticketFirst_sender_ceiling`, `ticketFirst_numeric_ceiling` | via `thmB_b_opt`; see Deviation 4 |
+| extra | `gmaxOpt_eq_one_add` | the second closed form of Theorem 2(b), `γ_max = 1 + Δ/(δ + w)` |
+| extra | `ticketFirst_sender_feasible_iff` | the numeric instance through `thmB_iff`: feasible iff `γ ≤ 47/23` |
+
+## Build time
+Full `lake build`: 16 min 49 s wall-clock. This is longer than earlier phases because changing the `gmaxBSR` docstring rebuilt `Block14`, `Block16` and `Audit` as well
+(`Block14` 133 s, `Block16` 144 s, `Block17` 144 s, `Audit` 354 s; the machine was also slower than in earlier runs).
+
+## Deviations
+1. **Docstring-only change in Block 14.** The docstring of `gmaxBSR` now describes the first argument as the host window `W = t2 - t1` instead of the slot length. The definition,
+   its binder names (the code still calls the first argument `T`) and every statement are unchanged; `gmaxBSR_values` (`W = 12, 6`) is still valid. Verified with `git diff`: the only
+   changes to `Block14.lean` are the docstring lines, and `AXIOMS.txt` differs from the previous version by additions only.
+2. **88 is proved directly** (`linarith` on the two bounds), not by composing 85 and 86; the statement is as requested.
+3. **89 is one conjunction** of the three requested groups, with `νh = 1 / (70 * 10 ^ (-9 : ℤ))` written out. Lean's `padLength` (Block 14) names its first argument `Ω`; the paper has since
+   renamed the opening window `Θ` (to free `Ω` for the sample space). The Lean binder was left alone to avoid touching existing statements, so `Ω` in Blocks 14 and 15 means the paper's `Θ`.
+4. **90 is two theorems plus an extra.** `ticketFirst_sender_ceiling` is exactly the statement requested: `thmB_b_opt` (honest solvers start at broadcast, `th = tpub`) with `w = 0` and `δ = Δ > 0` gives `2`.
+   The closed form was instantiated (`rw [thmB_b_opt ...]`), not restated. `ticketFirst_numeric_ceiling` is the numeric instance (`tpub = 1/2`, `t1 = 12`, `th = tpub`, `t2 = 24`): it is
+   `thmB_b_opt` with `t0 = tpub`, `w = 0`, `δ = 23/2`, `Δ = 12`, giving `47/23`, and `2 < 47/23 < 2.05`. Since `δ = 23/2 ≠ Δ = 12` here, the value is `≈ 2` (`2.043`), not exactly `2`.
+5. **Items 86 and 87 supersede the six-second values of Phase 5.** `gmaxBSR 6 1 = 5` and `gmaxBSR 6 2 = 2` are still true, but the revised paper no longer uses them: its six-second windows are `4` to `4.5` s,
+   so the relevant ceilings are item 87's `1` to `5/4` (`ω = 2`) and `3` to `7/2` (`ω = 1`).
+
+## What is and is not formalized
+- **Formalized:** the arithmetic of the host window: ceilings `(W - ω)/ω`, their monotonicity in `W`, the ticket-first and six-second values, the pad lengths, and the sender-side time-lock ceiling.
+- **Not formalized (modelling inputs, not theorems):** when fast confirmation of `B[n+1]` happens (`3` to `4` s into the slot, the extra second for aggregation is the paper's estimate), the ePBS deadlines
+  (attestations at `3` s, payload at `6` s, builder commitment at the slot start), and the mapping of Herold's ticket-first design onto BSR's `t1`, `d` and `t2` (`t1` = fast confirmation of `B[n+1]`,
+  `t2` = start of slot `n+2`, so `W = slot - t_fc`). The scaling of fast confirmation with the slot length for six-second slots is also an input (see observation 6). The hardware latency gap
+  remains an assumption; only the ratio `γ = νa/νh` appears.
+
+## Observations on the revised paper
+1. **(i) Section 8 "Parameters and instantiation" and Appendix A "Parameters" match items 86-89 and the existing values, line by line.**
+
+   | paper | formal / script | status |
+   |---|---|---|
+   | `W ≈ 8` to `9` s (twelve-second slots, `t_fc = 4, 3`) | `W = 12 - t_fc` | ok |
+   | `γ_max` `3` to `3.5` for `ω = 2` s | `gmaxBSR 8 2 = 3`, `9 2 = 7/2` (item 86) | ok |
+   | `γ_max` `7` to `8` for `ω = 1` s | `gmaxBSR 8 1 = 7`, `9 1 = 8` (item 86) | ok |
+   | escrow on receipt: `W ≈ 12`, `Θ = 10, 11`, `γ_max = 5, 11` | `gmaxBSR 12 2 = 5`, `12 1 = 11` (`gmaxBSR_values`) | ok |
+   | six-second slots: `W ≈ 4` to `4.5`, ceilings `1` to `1.25` (`ω = 2`), `3` to `3.5` (`ω = 1`) | item 87 | ok |
+   | pad `0.86 × 10^8` for `Θ = 6` s | item 89: `(8.5, 8.6) × 10^7` (`8.571 × 10^7`) | ok |
+   | pad `1.4 × 10^8` for `Θ = 10` s | `pad_length_example`: `(1.4, 1.5) × 10^8` (`1.429 × 10^8`) | ok |
+   | pad `1.6 × 10^8` for `Θ = 11` s | item 89: `(1.5, 1.6) × 10^8` (`1.571 × 10^8`) | ok, rounded up |
+   | "the pad has `0.9` to `1.6 × 10^8` steps" (Section 8) | exact range for the twelve-second cases: `0.857` to `1.571 × 10^8` | fair rounding to one decimal; `0.86` to `1.57` would be exact |
+
+   The rounding of `1.571` to "1.6" is fair (item 89 proves it lies in `(1.5, 1.6)`; two-significant-figure rounding gives `1.6`). The pad lengths for six-second slots (`0.29` to `0.5 × 10^8`) are not stated in the paper.
+2. **(ii) The abstract's "3 to 5 (or 7 to 11)", Open problems item 1 and the Conclusion are numerically consistent with item 86 and `gmaxBSR_values`, but merge two variants.** The fast-confirmed variant (the one
+   the paper calls the instantiation) gives `3` to `3.5` (`ω = 2`) and `7` to `8` (`ω = 1`); the upper ends `5` and `11` belong to the escrow-on-receipt variant (`W = 12`), which Section 8 says gives up
+   the members' refusal to release on an unconfirmed block. Suggest "3 to 3.5 (7 to 8), or 5 (11) if escrows are sent on receipt" in the abstract and the Conclusion, or a footnote saying which variant
+   each end belongs to.
+3. **(iii) Section 5's sentence ("then `δ ≈ Δ` and `γ_max ≈ 2`") is correct.** Item 90: with `w = 0` and `δ = Δ > 0` the ceiling is exactly `2` (`1 + Δ/δ`); the paper's concrete numbers
+   (`tpub = 1/2`, `t1 = 12`, `t2 = 24`, i.e. `δ = 11.5`, `Δ = 12`) give `47/23 = 2.043`, which lies in `(2, 2.05)`. With `w = 0` the two closed forms of Theorem 2(b) coincide, so the sentence does not
+   depend on where honest solvers start.
+4. **(iv) `python/bsr_params.py` prints the same values.** Output (run from outside the repo, `python3 -I`, so its `bsr_params.json` did not land in the repository):
+   ```
+   slot     W omega Theta gamma_max        pad L  case
+     12     8   2.0   6.0       3.0    8.571e+07  fast-confirmed B[n+1], t_fc = 4 s
+     12     8   1.0   7.0       7.0    1.000e+08  fast-confirmed B[n+1], t_fc = 4 s
+     12     9   2.0   7.0       3.5    1.000e+08  fast-confirmed B[n+1], t_fc = 3 s
+     12     9   1.0   8.0       8.0    1.143e+08  fast-confirmed B[n+1], t_fc = 3 s
+     12    12   2.0  10.0       5.0    1.429e+08  escrow on receipt of B[n+1]
+     12    12   1.0  11.0      11.0    1.571e+08  escrow on receipt of B[n+1]
+      6     4   2.0   2.0       1.0    2.857e+07  fast-confirmed B[n+1], t_fc = 2 s
+      6     4   1.0   3.0       3.0    4.286e+07  fast-confirmed B[n+1], t_fc = 2 s
+      6   4.5   2.0   2.5      1.25    3.571e+07  fast-confirmed B[n+1], t_fc = 1.5 s
+      6   4.5   1.0   3.5       3.5    5.000e+07  fast-confirmed B[n+1], t_fc = 1.5 s
+
+   sender-side time-lock ceiling in the ticket-first design (12 s slots): 2.04
+   ```
+   Every `γ_max` equals the Lean values (86, 87, `gmaxBSR_values`), every pad length equals item 89 or `pad_length_example`, and `2.04` is item 90's `47/23`. The script has no hard-coded output paths
+   (it writes `bsr_params.json` to the current directory).
+5. **Further numbers I checked (outside Lean).** The dispute-game claim "about 28 rounds for `L ≈ 1.4 × 10^8`": `log2(1.4 × 10^8) = 27.06`, so `⌈log2 L⌉ = 28`. The Student-t sentence in Section 10: with
+   the Gaussian variance (`σ = 51%`, `Δ = 8` s, `s = 2.57` bp) and `5` degrees of freedom the fees are `6.75` and `11.81` bp at `1%` and `0.1%` (paper: "about 6.8 and 11.8"), and `15.26` bp for `0.1%` with `3` degrees
+   of freedom (paper: `15.3`), all below `25` (the lower bound `f_inv(1/64) · 50 = 25.1`).
+6. **The six-second windows rest on an assumption the paper does not state.** `bsr_params.py` says "six-second slots scale the fast-confirmation point proportionally (an assumption, not a measurement)"
+   (`t_fc = 2` and `1.5` s for `4` and `3` s in twelve-second slots), which gives `W = 4` and `4.5`; Appendix A states the windows and ceilings without saying so. Suggest adding "assuming fast
+   confirmation scales with the slot".
+7. **Housekeeping the paper and repository now disagree on.** Appendix B says "107 theorems"; the development now audits 116 (add: the host-window ceilings and pad lengths, and the sender-side ceiling). The paper
+   cites `https://github.com/aryaethn/optionality` for the code, but that repository is **private**, so readers cannot reach it until it is made public. The repository's `README.md` still carries the earlier paper title and
+   the count `107`, and lists the python scripts without `bsr_params.py`; none of this phase's changes (Block 17, the Block 14 docstring, `AXIOMS.txt`, `python/bsr_params.py`) has been committed or pushed.

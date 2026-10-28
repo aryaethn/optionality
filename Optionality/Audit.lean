@@ -110,3 +110,12 @@ open Optionality
 #print axioms ceil_two_thirds_strict_iff
 #print axioms pad_length_example_eleven
 #print axioms calib_f1_example
+#print axioms gmaxBSR_strictMono_window
+#print axioms gmaxBSR_values_ticketFirst
+#print axioms gmaxBSR_values_six
+#print axioms gmaxBSR_range_ticketFirst
+#print axioms pad_length_examples
+#print axioms gmaxOpt_eq_one_add
+#print axioms ticketFirst_sender_ceiling
+#print axioms ticketFirst_numeric_ceiling
+#print axioms ticketFirst_sender_feasible_iff
